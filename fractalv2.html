@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Interactive Fractal Tree</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: black;
+  }
+  canvas {
+    position: absolute;
+  }
+</style>
+</head>
+<body>
+<canvas></canvas>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const canvas = document.querySelector('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let isDrawing = false;
+  let startDepth = 0;
+  let intervalId;
+
+  function drawFractal(x, y, length, angle, depth) {
+    if (depth === 0) return;
+
+    ctx.beginPath();
+    ctx.save();
+    ctx.strokeStyle = 'white';
+    ctx.translate(x, y);
+    ctx.rotate(angle * Math.PI / 180);
+    ctx.moveTo(0, 0);
+    // Randomize the length for each branch
+    const newLength = length * (0.7 + Math.random() * 0.3);
+    ctx.lineTo(0, -newLength);
+    ctx.stroke();
+
+    if (depth > 1) {
+      drawFractal(0, -newLength, newLength * 0.7, angle - 20 + Math.random() * 40 - 20, depth - 1);
+      drawFractal(0, -newLength, newLength * 0.7, angle + 20 + Math.random() * 40 - 20, depth - 1);
+    }
+
+    ctx.restore();
+  }
+
+  function onMouseDown(e) {
+    if (isDrawing) return;
+    isDrawing = true;
+    const x = e.clientX;
+    const y = e.clientY;
+    startDepth = 0;
+    
+    // No clearRect here to keep the fractals on the screen
+
+    intervalId = setInterval(function() {
+      startDepth++;
+      drawFractal(x, y, 50, -90, startDepth); // Start with a fixed length, but it will vary in the recursive calls
+    }, 500); // Increase recursion depth every half second
+  }
+
+  function onMouseUp() {
+    clearInterval(intervalId);
+    isDrawing = false;
+  }
+
+  canvas.addEventListener('mousedown', onMouseDown);
+  window.addEventListener('mouseup', onMouseUp);
+});
+</script>
+</body>
+</html>
